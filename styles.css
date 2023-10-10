@@ -1,0 +1,9 @@
+.gnuplot {
+    text-align: center;   
+}
+
+.gnuplot svg {
+    background-color: var(--background-secondary);
+    border-radius: 11px;
+    border: 1px solid var(--background-modifier-border);
+}

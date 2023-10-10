@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownPostProcessor, MarkdownPostProcessorContext, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { spawn } from "child_process";
 
 
@@ -17,10 +17,10 @@ const DEFAULT_SETTINGS: GnuPlotSettings = {
 export default class GnuPlotPlugin extends Plugin {
 	settings: GnuPlotSettings;
 
-  async onload() {
+	async onload() {
 		await this.loadSettings();
 
-		let plot = (source, el, ctx) => {
+		let plot = (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
 			const child = spawn(this.settings.binary, []);
 			child.stdout.pipe(process.stdout);
 
@@ -37,17 +37,18 @@ export default class GnuPlotPlugin extends Plugin {
 				});
 			}
 			
-      child.on("close", (code) => {
-        if (code === 0) {
+			child.on("close", (code) => {
+				if (code === 0) {
 					el.innerHTML = stdout;
-        } else {
+					el.classList.add("gnuplot");
+				} else {
 					el.innerHTML = "<h1> An error occured </h1>"
-        }
-      });
-	}
+				}
+			});
+		}
 
-    this.registerMarkdownCodeBlockProcessor("plot", plot);
-    this.registerMarkdownCodeBlockProcessor("plotinteractive", plot);
+		this.registerMarkdownCodeBlockProcessor("plot", plot);
+		this.registerMarkdownCodeBlockProcessor("plotinteractive", plot);
 
 		this.addSettingTab(new SettingsTab(this.app, this));
 	}
